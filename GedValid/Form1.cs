@@ -1,17 +1,12 @@
-﻿using System;
+﻿using GEDWrap;
+using SharpGEDParser;
+using SharpGEDParser.Model;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using GEDWrap;
-using SharpGEDParser;
-using SharpGEDParser.Model;
 
 using atup = System.Tuple<SharpGEDParser.Model.UnkRec.ErrorCode, string>;
 using atup2 = System.Tuple<SharpGEDParser.Model.UnkRec, SharpGEDParser.Model.GEDCommon>;
@@ -183,6 +178,11 @@ namespace GedValid
         private void ProcessGED(string gedPath)
         {
             Text = gedPath;
+
+            listBox1.Items.Clear();
+            listBox2.Items.Clear();
+            richTextBox1.ResetText();
+
             Application.DoEvents(); // Cycle events so image updates in case GED load/process takes a while
             LoadGed(this, new EventArgs());
         }
@@ -284,11 +284,78 @@ namespace GedValid
                 return txt;
             }
         }
-        private void listBox1_DoubleClick(object sender, EventArgs e)
+
+        // NOTE: reading to record would be faster if during the parse, the relative position of each record was remembered
+        // NOTE: using record position may be required to cope with line break behavior
+
+        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ListBoxItem2 lbi = listBox2.SelectedItem as ListBoxItem2;
+            int beg = lbi.rec.BegLine;
+            int end = lbi.rec.EndLine;
+
+            var lins = ReadLineSet(beg, end);
+
+            int errbeg = lbi.err.Beg;
+            int errend = lbi.err.End;
+
+            richTextBox1.ResetText();
+
+            int errLoc = 0; // track location of error lines to insure visibility
+            for (int i = beg; i <= end; i++)
+            {
+                string lin = lins[i - beg];
+                if (i >= errbeg && i <= errend)
+                {
+                    richTextBox1.SelectionColor = Color.Red;
+                    errLoc = richTextBox1.SelectionStart;
+                }
+                else
+                    richTextBox1.SelectionColor = Color.Black;
+
+                richTextBox1.AppendText(lin);
+                richTextBox1.AppendText(Environment.NewLine);
+            }
+
+            richTextBox1.SelectionStart = errLoc; // insure error lines are visible
+            richTextBox1.ScrollToCaret();
+
+            // 1. have a record
+            // 2. get lines from file for the record
+            // 3. determine range of lines for the error
+            // 4. for each line from file:
+            // 4a. if line is within error range
+            // 4ai. set format to Red
+            // 4aii. else
+            // 4aiii. set format to black
+            // 4b. append text
+            // 4c. append environment.newline
+        }
+
+
+        private List<string> ReadLineSet(int beg, int end)
+        {
+            List<string> outl = new List<string>();
+
+            using (Stream stream = File.Open(LastFile, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(stream))
+                {
+                    for (int i = 1; i < beg; i++)
+                        sr.ReadLine();
+                    for (int i = beg; i <= end; i++)
+                        outl.Add(sr.ReadLine());
+                }
+            }
+            return outl;
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             var obj = listBox1.SelectedItem as LBItem;
 
             listBox2.Items.Clear(); // TODO delay update?
+            richTextBox1.ResetText();
 
             if (obj.type != ISS)
             {
@@ -325,62 +392,6 @@ namespace GedValid
                     listBox2.Items.Add(lbi2);
                 }
             }
-        }
-
-        // NOTE: reading to record would be faster if during the parse, the relative position of each record was remembered
-        // NOTE: using record position may be required to cope with line break behavior
-
-        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ListBoxItem2 lbi = listBox2.SelectedItem as ListBoxItem2;
-            int beg = lbi.rec.BegLine;
-            int end = lbi.rec.EndLine;
-
-            var lins = ReadLineSet(beg, end);
-
-            int errbeg = lbi.err.Beg;
-            int errend = lbi.err.End;
-
-            richTextBox1.ResetText();
-            for (int i = beg; i <= end; i++)
-            {
-                string lin = lins[i - beg];
-                if (i >= errbeg && i <= errend)
-                    richTextBox1.SelectionColor = Color.Red;
-                else
-                    richTextBox1.SelectionColor = Color.Black;
-
-                richTextBox1.AppendText(lin);
-                richTextBox1.AppendText(Environment.NewLine);
-            }
-            // 1. have a record
-            // 2. get lines from file for the record
-            // 3. determine range of lines for the error
-            // 4. for each line from file:
-            // 4a. if line is within error range
-            // 4ai. set format to Red
-            // 4aii. else
-            // 4aiii. set format to black
-            // 4b. append text
-            // 4c. append environment.newline
-        }
-
-
-        private List<string> ReadLineSet(int beg, int end)
-        {
-            List<string> outl = new List<string>();
-
-            using (Stream stream = File.Open(LastFile, FileMode.Open))
-            {
-                using (StreamReader sr = new StreamReader(stream))
-                {
-                    for (int i = 1; i < beg; i++)
-                        sr.ReadLine();
-                    for (int i = beg; i <= end; i++)
-                        outl.Add(sr.ReadLine());
-                }
-            }
-            return outl;
         }
     }
 }
