@@ -1,4 +1,5 @@
-﻿using GEDWrap;
+﻿using System.Threading;
+using GEDWrap;
 using SharpGEDParser;
 using SharpGEDParser.Model;
 using System;
@@ -51,12 +52,40 @@ namespace GedValid
         public const int ISS = 2;
         public const int UNK = 3;
 
+        private void LoadGedBack()
+        {
+            // TODO needs a delay: don't invoke the busy dlg until after 1 second
+            // TODO busy dialog to common library
+
+            _gedTrees = new Forest();
+
+            Busy waitDlg = new Busy();
+            waitDlg.Msg = "Loading GEDCOM";
+            waitDlg.Owner = this;
+            waitDlg.StartPosition = FormStartPosition.CenterParent;
+
+            Thread loadThread = new Thread(
+                new ThreadStart(() =>
+                {
+                    // TODO Using LastFile is a hack... pass path in args? not as event?            
+                    _gedTrees.LoadGEDCOM(LastFile);
+                    waitDlg.BeginInvoke(new Action(() => { waitDlg.Close(); }));
+                }
+                    ));
+
+            loadThread.Start();
+            waitDlg.ShowDialog();
+        }
+
+        private Forest _gedTrees;
+
         private void Form1_LoadGed(object sender, EventArgs e)
         {
+            LoadGedBack();
+
             //logit("LoadGed 1", true);
-            Forest gedtrees = new Forest();
-            // TODO Using LastFile is a hack... pass path in args? not as event?            
-            gedtrees.LoadGEDCOM(LastFile);
+            //Forest _gedTrees = new Forest();
+            //_gedTrees.LoadGEDCOM(LastFile);
             //logit("LoadGed 2");
 
             _errsByCodeAndTag = new Dictionary<atup, List<atup2>>();
@@ -65,9 +94,9 @@ namespace GedValid
 
             
             // TODO can't get to reader top-level errors!
-            //gedtrees._gedReader.Errors;
+            //_gedTrees._gedReader.Errors;
 
-            foreach (var record in gedtrees.AllRecords)
+            foreach (var record in _gedTrees.AllRecords)
             {
                 foreach (var err in record.Errors)
                 {
@@ -96,7 +125,7 @@ namespace GedValid
             }
 
             // TODO need the issue<>gedcommon connection
-            foreach (var issue in gedtrees.Issues)
+            foreach (var issue in _gedTrees.Issues)
             {
                 if (!_issByCode.ContainsKey(issue.IssueId))
                     _issByCode.Add(issue.IssueId, new List<Issue>(){issue});
