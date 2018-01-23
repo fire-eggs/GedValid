@@ -39,10 +39,10 @@
             this.printToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.listBox2 = new System.Windows.Forms.ListBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.listBox2 = new System.Windows.Forms.ListBox();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -68,26 +68,26 @@
             this.recentFilesToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openGEDCOMToolStripMenuItem
             // 
             this.openGEDCOMToolStripMenuItem.Name = "openGEDCOMToolStripMenuItem";
-            this.openGEDCOMToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.openGEDCOMToolStripMenuItem.Size = new System.Drawing.Size(189, 24);
             this.openGEDCOMToolStripMenuItem.Text = "Open GEDCOM...";
             this.openGEDCOMToolStripMenuItem.Click += new System.EventHandler(this.openGEDCOMToolStripMenuItem_Click);
             // 
             // recentFilesToolStripMenuItem
             // 
             this.recentFilesToolStripMenuItem.Name = "recentFilesToolStripMenuItem";
-            this.recentFilesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.recentFilesToolStripMenuItem.Size = new System.Drawing.Size(189, 24);
             this.recentFilesToolStripMenuItem.Text = "Recent Files";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(189, 24);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -98,27 +98,27 @@
             this.printSettingsToolStripMenuItem,
             this.printToolStripMenuItem1});
             this.printToolStripMenuItem.Name = "printToolStripMenuItem";
-            this.printToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.printToolStripMenuItem.Size = new System.Drawing.Size(51, 24);
             this.printToolStripMenuItem.Text = "Print";
             // 
             // printPreviewToolStripMenuItem
             // 
             this.printPreviewToolStripMenuItem.Name = "printPreviewToolStripMenuItem";
-            this.printPreviewToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.printPreviewToolStripMenuItem.Size = new System.Drawing.Size(165, 24);
             this.printPreviewToolStripMenuItem.Text = "Print Preview";
             this.printPreviewToolStripMenuItem.Click += new System.EventHandler(this.printPreviewToolStripMenuItem_Click);
             // 
             // printSettingsToolStripMenuItem
             // 
             this.printSettingsToolStripMenuItem.Name = "printSettingsToolStripMenuItem";
-            this.printSettingsToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.printSettingsToolStripMenuItem.Size = new System.Drawing.Size(165, 24);
             this.printSettingsToolStripMenuItem.Text = "Print Settings";
             this.printSettingsToolStripMenuItem.Click += new System.EventHandler(this.printSettingsToolStripMenuItem_Click);
             // 
             // printToolStripMenuItem1
             // 
             this.printToolStripMenuItem1.Name = "printToolStripMenuItem1";
-            this.printToolStripMenuItem1.Size = new System.Drawing.Size(144, 22);
+            this.printToolStripMenuItem1.Size = new System.Drawing.Size(165, 24);
             this.printToolStripMenuItem1.Text = "Print";
             this.printToolStripMenuItem1.Click += new System.EventHandler(this.printToolStripMenuItem1_Click);
             // 
@@ -155,10 +155,19 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(1516, 44);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(4, 5);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(1352, 22);
+            this.textBox1.TabIndex = 0;
+            // 
             // listBox1
             // 
             this.listBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.listBox1.FormattingEnabled = true;
+            this.listBox1.HorizontalScrollbar = true;
             this.listBox1.ItemHeight = 20;
             this.listBox1.Location = new System.Drawing.Point(18, 104);
             this.listBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -166,18 +175,6 @@
             this.listBox1.Size = new System.Drawing.Size(344, 444);
             this.listBox1.TabIndex = 1;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
-            // 
-            // listBox2
-            // 
-            this.listBox2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.listBox2.FormattingEnabled = true;
-            this.listBox2.ItemHeight = 20;
-            this.listBox2.Location = new System.Drawing.Point(398, 104);
-            this.listBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.listBox2.Name = "listBox2";
-            this.listBox2.Size = new System.Drawing.Size(346, 444);
-            this.listBox2.TabIndex = 2;
-            this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
             // 
             // richTextBox1
             // 
@@ -192,13 +189,18 @@
             this.richTextBox1.Text = "";
             this.richTextBox1.WordWrap = false;
             // 
-            // textBox1
+            // listBox2
             // 
-            this.textBox1.Location = new System.Drawing.Point(4, 5);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(1352, 22);
-            this.textBox1.TabIndex = 0;
+            this.listBox2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.listBox2.FormattingEnabled = true;
+            this.listBox2.HorizontalScrollbar = true;
+            this.listBox2.ItemHeight = 20;
+            this.listBox2.Location = new System.Drawing.Point(398, 104);
+            this.listBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.listBox2.Name = "listBox2";
+            this.listBox2.Size = new System.Drawing.Size(346, 444);
+            this.listBox2.TabIndex = 2;
+            this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
             // 
             // Form1
             // 

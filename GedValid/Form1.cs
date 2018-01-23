@@ -182,6 +182,7 @@ namespace GedValid
             listBox1.Items.Clear();
             listBox2.Items.Clear();
             richTextBox1.ResetText();
+            textBox1.Text = "";
 
             Application.DoEvents(); // Cycle events so image updates in case GED load/process takes a while
             LoadGed(this, new EventArgs());
@@ -288,23 +289,42 @@ namespace GedValid
         // NOTE: reading to record would be faster if during the parse, the relative position of each record was remembered
         // NOTE: using record position may be required to cope with line break behavior
 
+        private GEDCommon _lastrec; // Avoid re-reading the same record
+        private List<string> _lines;
+
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // 1. have a record
+            // 2. get lines from file for the record
+            // 3. determine range of lines for the error
+            // 4. for each line from file:
+            // 4a. if line is within error range
+            // 4ai. set format to Red
+            // 4aii. else
+            // 4aiii. set format to black
+            // 4b. append text
+            // 4c. append environment.newline
+
             ListBoxItem2 lbi = listBox2.SelectedItem as ListBoxItem2;
+
             int beg = lbi.rec.BegLine;
             int end = lbi.rec.EndLine;
 
-            var lins = ReadLineSet(beg, end);
+            if (_lastrec != lbi.rec)
+            {
+                _lastrec = lbi.rec;
+                _lines = ReadLineSet(beg, end);
+            }
 
             int errbeg = lbi.err.Beg;
             int errend = lbi.err.End;
 
-            richTextBox1.ResetText();
+            richTextBox1.Clear();
 
             int errLoc = 0; // track location of error lines to insure visibility
             for (int i = beg; i <= end; i++)
             {
-                string lin = lins[i - beg];
+                string lin = _lines[i - beg];
                 if (i >= errbeg && i <= errend)
                 {
                     richTextBox1.SelectionColor = Color.Red;
@@ -317,19 +337,10 @@ namespace GedValid
                 richTextBox1.AppendText(Environment.NewLine);
             }
 
-            richTextBox1.SelectionStart = errLoc; // insure error lines are visible
-            richTextBox1.ScrollToCaret();
+            targetVCenter(errbeg-beg, errend-beg);
+            //richTextBox1.SelectionStart = errLoc; // insure error lines are visible
+            //richTextBox1.ScrollToCaret();
 
-            // 1. have a record
-            // 2. get lines from file for the record
-            // 3. determine range of lines for the error
-            // 4. for each line from file:
-            // 4a. if line is within error range
-            // 4ai. set format to Red
-            // 4aii. else
-            // 4aiii. set format to black
-            // 4b. append text
-            // 4c. append environment.newline
         }
 
 
@@ -392,6 +403,38 @@ namespace GedValid
                     listBox2.Items.Add(lbi2);
                 }
             }
+        }
+
+        private int lineHeight()
+        {
+            // Calculate the vertical height of a richtextbox in lines
+
+            //Get the height of the text area.
+
+            int height = TextRenderer.MeasureText(richTextBox1.Text, richTextBox1.Font).Height;
+
+            //rate = visible height / Total height.
+
+            float rate = (1.0f * richTextBox1.Height) / height;
+
+            //Get visible lines.
+
+            int visibleLines = (int)(richTextBox1.Lines.Length * rate);
+            return visibleLines;
+        }
+
+        private void targetVCenter(int beg, int end)
+        {
+            // Desire to have a set of lines in vertical center of textbox
+            int high = lineHeight();
+            float target = beg + (end - beg)/2.0f;
+            float targetTop = target - high/2.0f;
+            if (targetTop < 0)
+                return; // can't position above top
+
+            int dex = richTextBox1.GetFirstCharIndexFromLine((int) targetTop);
+            richTextBox1.SelectionStart = dex; 
+            richTextBox1.ScrollToCaret();
         }
     }
 }
