@@ -142,7 +142,7 @@ namespace GedValid
                 lbi.type = ERR;
                 lbi.key = key;
                 lbi.data = _errsByCodeAndTag[key];
-                lbi.disp = string.Format(".Err:{0} Tag: {1} Count:{2}", key.Item1, key.Item2, _errsByCodeAndTag[key].Count);
+                lbi.disp = string.Format("{0} Tag: {1} :x({2})", key.Item1, key.Item2, _errsByCodeAndTag[key].Count);
 
                 listBox1.Items.Add(lbi);
             }
@@ -154,7 +154,7 @@ namespace GedValid
                 lbi.type = ISS;
                 lbi.key = iss;
                 lbi.data = _issByCode[iss];
-                lbi.disp = string.Format(".Iss:{0} Count:{1}", iss, _issByCode[iss].Count);
+                lbi.disp = string.Format("{0} :x({1})", iss, _issByCode[iss].Count);
 
                 listBox1.Items.Add(lbi);
             }
@@ -166,7 +166,7 @@ namespace GedValid
                 lbi.key = key;
                 lbi.type = UNK;
                 lbi.data = _unkByTag[key];
-                lbi.disp = string.Format(".Unk:{0} Count:{1}", key, _unkByTag[key].Count);
+                lbi.disp = string.Format("Invalid tag {0} :x({1})", key, _unkByTag[key].Count);
 
                 listBox1.Items.Add(lbi);
             }
