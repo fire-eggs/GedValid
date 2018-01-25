@@ -19,7 +19,7 @@ namespace GedValid
 
     public class AppSettings<T> where T : new()
     {
-        private const string DEFAULT_FILENAME = "DrawAnce_settings.jsn";
+        private const string DEFAULT_FILENAME = "GedValid_settings.jsn";
 
         public void Save(string fileName = DEFAULT_FILENAME)
         {
