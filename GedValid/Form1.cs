@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.CodeDom;
+using System.Data;
 using System.Threading;
 using GEDWrap;
 using SharpGEDParser;
@@ -135,83 +136,7 @@ namespace GedValid
                     _issByCode[issue.IssueId].Add(issue);
                 }
             }
-
-            DataTable issues = new DataTable();
-            issues.Columns.Add("Issue");
-            issues.Columns.Add("Tag");
-            issues.Columns.Add("Count");
-            issues.Columns.Add("Type");
-            issues.Columns["Type"].DataType = typeof (int);
-            issues.Columns.Add("Data");
-            issues.Columns["Data"].DataType = typeof(object);
-
-            // list of errors
-            foreach (var key in _errsByCodeAndTag.Keys)
-            {
-                LBItem lbi = new LBItem();
-                lbi.type = ERR;
-                lbi.key = key;
-                lbi.data = _errsByCodeAndTag[key];
-                lbi.disp = string.Format("{0} Tag: {1} :x({2})", key.Item1, key.Item2, _errsByCodeAndTag[key].Count);
-
-                DataRow row = issues.NewRow();
-                row["Issue"] = key.Item1;
-                row["Tag"] = key.Item2;
-                row["Count"] = _errsByCodeAndTag[key].Count;
-                row["Type"] = ERR;
-                row["Data"] = _errsByCodeAndTag[key];
-                issues.Rows.Add(row);
-
-//                listBox1.Items.Add(lbi);
-            }
-
-            // list of issues
-            foreach (var iss in _issByCode.Keys)
-            {
-                LBItem lbi = new LBItem();
-                lbi.type = ISS;
-                lbi.key = iss;
-                lbi.data = _issByCode[iss];
-                lbi.disp = string.Format("{0} :x({1})", iss, _issByCode[iss].Count);
-
-                DataRow row = issues.NewRow();
-                row["Issue"] = iss;
-                row["Tag"] = "";
-                row["Count"] = _issByCode[iss].Count;
-                row["Type"] = ISS;
-                row["Data"] = _issByCode[iss];
-                issues.Rows.Add(row);
-
-//                listBox1.Items.Add(lbi);
-            }
-
-            // list of unknowns
-            foreach (var key in _unkByTag.Keys)
-            {
-                LBItem lbi = new LBItem();
-                lbi.key = key;
-                lbi.type = UNK;
-                lbi.data = _unkByTag[key];
-                lbi.disp = string.Format("Invalid tag {0} :x({1})", key, _unkByTag[key].Count);
-
-                DataRow row = issues.NewRow();
-                row["Issue"] = "Unknown tag";
-                row["Tag"] = key;
-                row["Count"] = _unkByTag[key].Count;
-                row["Type"] = UNK;
-                row["Data"] = _unkByTag[key];
-
-                issues.Rows.Add(row);
-
-//                listBox1.Items.Add(lbi);
-            }
-
-            dataGridView1.SuspendLayout();
-            dataGridView1.DataSource = issues;
-            dataGridView1.Columns["Type"].Visible = false;
-            dataGridView1.Columns["Data"].Visible = false;
-            dataGridView1.Columns["Count"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridView1.ResumeLayout();
+            Rebuild();
         }
 
         private void OnMRU(int number, string filename)
@@ -414,7 +339,6 @@ namespace GedValid
 
         }
 
-
         private List<string> ReadLineSet(int beg, int end)
         {
             List<string> outl = new List<string>();
@@ -524,6 +448,100 @@ namespace GedValid
                 return;
             var row = dataGridView1.SelectedRows[0];
             PopulateLineList((int)row.Cells["Type"].Value, row.Cells["Data"].Value);
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Settings setDlg = new Settings(_mysettings);
+            setDlg.StartPosition = FormStartPosition.CenterParent;
+            if (setDlg.ShowDialog(this) == DialogResult.OK)
+            {
+                _mysettings = setDlg.SettingsValue;
+                Rebuild();
+            }
+        }
+
+        private void Rebuild()
+        {
+            DataTable issues = new DataTable();
+            issues.Columns.Add("Issue");
+            issues.Columns.Add("Tag");
+            issues.Columns.Add("Count");
+            issues.Columns.Add("Type");
+            issues.Columns["Type"].DataType = typeof(int);
+            issues.Columns.Add("Data");
+            issues.Columns["Data"].DataType = typeof(object);
+
+            // list of errors
+            foreach (var key in _errsByCodeAndTag.Keys)
+            {
+                LBItem lbi = new LBItem();
+                lbi.type = ERR;
+                lbi.key = key;
+                lbi.data = _errsByCodeAndTag[key];
+                lbi.disp = string.Format("{0} Tag: {1} :x({2})", key.Item1, key.Item2, _errsByCodeAndTag[key].Count);
+
+                DataRow row = issues.NewRow();
+                row["Issue"] = key.Item1;
+                row["Tag"] = key.Item2;
+                row["Count"] = _errsByCodeAndTag[key].Count;
+                row["Type"] = ERR;
+                row["Data"] = _errsByCodeAndTag[key];
+                issues.Rows.Add(row);
+
+                //                listBox1.Items.Add(lbi);
+            }
+
+            // list of issues
+            foreach (var iss in _issByCode.Keys)
+            {
+                LBItem lbi = new LBItem();
+                lbi.type = ISS;
+                lbi.key = iss;
+                lbi.data = _issByCode[iss];
+                lbi.disp = string.Format("{0} :x({1})", iss, _issByCode[iss].Count);
+
+                DataRow row = issues.NewRow();
+                row["Issue"] = iss;
+                row["Tag"] = "";
+                row["Count"] = _issByCode[iss].Count;
+                row["Type"] = ISS;
+                row["Data"] = _issByCode[iss];
+                issues.Rows.Add(row);
+
+                //                listBox1.Items.Add(lbi);
+            }
+
+            // list of unknowns
+            foreach (var key in _unkByTag.Keys)
+            {
+                //LBItem lbi = new LBItem();
+                //lbi.key = key;
+                //lbi.type = UNK;
+                //lbi.data = _unkByTag[key];
+                //lbi.disp = string.Format("Invalid tag {0} :x({1})", key, _unkByTag[key].Count);
+
+                if (_mysettings.IgnoreCustom && key.StartsWith("_"))
+                    continue;
+
+                DataRow row = issues.NewRow();
+                row["Issue"] = "Unknown tag";
+                row["Tag"] = key;
+                row["Count"] = _unkByTag[key].Count;
+                row["Type"] = UNK;
+                row["Data"] = _unkByTag[key];
+
+                issues.Rows.Add(row);
+
+                //                listBox1.Items.Add(lbi);
+            }
+
+            dataGridView1.SuspendLayout();
+            dataGridView1.DataSource = issues;
+            dataGridView1.Columns["Type"].Visible = false;
+            dataGridView1.Columns["Data"].Visible = false;
+            dataGridView1.Columns["Count"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dataGridView1.ResumeLayout();
         }
     }
 }

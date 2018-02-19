@@ -15,6 +15,7 @@ namespace GedValid
         public int WinWide = -1;
         public string LastPath = null;
         public List<string> PathHistory = null;
+        public bool IgnoreCustom = false;
     }
 
     public class AppSettings<T> where T : new()
