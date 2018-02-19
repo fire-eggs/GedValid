@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Data;
+using System.Threading;
 using GEDWrap;
 using SharpGEDParser;
 using SharpGEDParser.Model;
@@ -135,6 +136,15 @@ namespace GedValid
                 }
             }
 
+            DataTable issues = new DataTable();
+            issues.Columns.Add("Issue");
+            issues.Columns.Add("Tag");
+            issues.Columns.Add("Count");
+            issues.Columns.Add("Type");
+            issues.Columns["Type"].DataType = typeof (int);
+            issues.Columns.Add("Data");
+            issues.Columns["Data"].DataType = typeof(object);
+
             // list of errors
             foreach (var key in _errsByCodeAndTag.Keys)
             {
@@ -144,7 +154,15 @@ namespace GedValid
                 lbi.data = _errsByCodeAndTag[key];
                 lbi.disp = string.Format("{0} Tag: {1} :x({2})", key.Item1, key.Item2, _errsByCodeAndTag[key].Count);
 
-                listBox1.Items.Add(lbi);
+                DataRow row = issues.NewRow();
+                row["Issue"] = key.Item1;
+                row["Tag"] = key.Item2;
+                row["Count"] = _errsByCodeAndTag[key].Count;
+                row["Type"] = ERR;
+                row["Data"] = _errsByCodeAndTag[key];
+                issues.Rows.Add(row);
+
+//                listBox1.Items.Add(lbi);
             }
 
             // list of issues
@@ -156,7 +174,15 @@ namespace GedValid
                 lbi.data = _issByCode[iss];
                 lbi.disp = string.Format("{0} :x({1})", iss, _issByCode[iss].Count);
 
-                listBox1.Items.Add(lbi);
+                DataRow row = issues.NewRow();
+                row["Issue"] = iss;
+                row["Tag"] = "";
+                row["Count"] = _issByCode[iss].Count;
+                row["Type"] = ISS;
+                row["Data"] = _issByCode[iss];
+                issues.Rows.Add(row);
+
+//                listBox1.Items.Add(lbi);
             }
 
             // list of unknowns
@@ -168,8 +194,24 @@ namespace GedValid
                 lbi.data = _unkByTag[key];
                 lbi.disp = string.Format("Invalid tag {0} :x({1})", key, _unkByTag[key].Count);
 
-                listBox1.Items.Add(lbi);
+                DataRow row = issues.NewRow();
+                row["Issue"] = "Unknown tag";
+                row["Tag"] = key;
+                row["Count"] = _unkByTag[key].Count;
+                row["Type"] = UNK;
+                row["Data"] = _unkByTag[key];
+
+                issues.Rows.Add(row);
+
+//                listBox1.Items.Add(lbi);
             }
+
+            dataGridView1.SuspendLayout();
+            dataGridView1.DataSource = issues;
+            dataGridView1.Columns["Type"].Visible = false;
+            dataGridView1.Columns["Data"].Visible = false;
+            dataGridView1.Columns["Count"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dataGridView1.ResumeLayout();
         }
 
         private void OnMRU(int number, string filename)
@@ -208,7 +250,7 @@ namespace GedValid
         {
             Text = gedPath;
 
-            listBox1.Items.Clear();
+//            listBox1.Items.Clear();
             listBox2.Items.Clear();
             richTextBox1.ResetText();
             textBox1.Text = "";
@@ -392,46 +434,8 @@ namespace GedValid
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var obj = listBox1.SelectedItem as LBItem;
-
-            listBox2.Items.Clear(); // TODO delay update?
-            richTextBox1.ResetText();
-
-            if (obj.type != ISS)
-            {
-                var foo = obj.data as List<atup2>;
-                atup2 first = foo[0];
-                if (obj.type == ERR)
-                    textBox1.Text = string.Format("Error: {0}, Tag:{2}, Count:{1}", first.Item1.Error, foo.Count, first.Item1.Tag);
-                else
-                    textBox1.Text = string.Format("Unknown: {0}, Count:{1}", first.Item1.Tag, foo.Count);
-
-                foreach (var tuple in foo)
-                {
-                    UnkRec unk = tuple.Item1;
-                    string val = string.Format("Lines:{0}-{1}", unk.Beg, unk.End);
-                    ListBoxItem2 lbi2 = new ListBoxItem2();
-                    lbi2.txt = val;
-                    lbi2.err = unk;
-                    lbi2.rec = tuple.Item2;
-                    listBox2.Items.Add(lbi2);
-                }
-            }
-            else
-            {
-                var foo = obj.data as List<Issue>;
-                Issue first = foo[0];
-                textBox1.Text = string.Format("Issue: {0}, Count:{1}", first.IssueId, foo.Count);
-                foreach (var iss in foo)
-                {
-                    string val = iss.Message();
-                    ListBoxItem2 lbi2 = new ListBoxItem2();
-                    lbi2.txt = val;
-                    lbi2.rec = null; // TODO need record link
-                    lbi2.iss = iss;
-                    listBox2.Items.Add(lbi2);
-                }
-            }
+            //var obj = listBox1.SelectedItem as LBItem;
+            //populateLineList(obj.type, obj.data);
         }
 
         private int lineHeight()
@@ -464,6 +468,62 @@ namespace GedValid
             int dex = richTextBox1.GetFirstCharIndexFromLine((int) targetTop);
             richTextBox1.SelectionStart = dex; 
             richTextBox1.ScrollToCaret();
+        }
+
+        private void PopulateLineList(int type, object data)
+        {
+            listBox2.SuspendLayout();
+            listBox2.Items.Clear(); // TODO delay update?
+            richTextBox1.ResetText();
+
+            if (type != ISS)
+            {
+                var foo = data as List<atup2>;
+                atup2 first = foo[0];
+                if (type == ERR)
+                    textBox1.Text = string.Format("Error: {0}{2}, Count:{1}", first.Item1.Error, foo.Count, 
+                        string.IsNullOrEmpty(first.Item1.Tag) ? "" : ", Tag:"+ first.Item1.Tag);
+                else
+                    textBox1.Text = string.Format("Unknown: {0}, Count:{1}", first.Item1.Tag, foo.Count);
+
+                foreach (var tuple in foo)
+                {
+                    UnkRec unk = tuple.Item1;
+                    string val = string.Format("Lines:{0}-{1}", unk.Beg, unk.End);
+                    ListBoxItem2 lbi2 = new ListBoxItem2();
+                    lbi2.txt = val;
+                    lbi2.err = unk;
+                    lbi2.rec = tuple.Item2;
+                    listBox2.Items.Add(lbi2);
+                }
+            }
+            else
+            {
+                var foo = data as List<Issue>;
+                Issue first = foo[0];
+                textBox1.Text = string.Format("Issue: {0}, Count:{1}", first.IssueId, foo.Count);
+                foreach (var iss in foo)
+                {
+                    string val = iss.Message();
+                    ListBoxItem2 lbi2 = new ListBoxItem2();
+                    lbi2.txt = val;
+                    lbi2.rec = null; // TODO need record link
+                    lbi2.iss = iss;
+                    listBox2.Items.Add(lbi2);
+                }
+            }
+
+            if (listBox2.Items.Count > 0)
+                listBox2.SelectedIndex = 0;
+            listBox2.ResumeLayout();
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count < 1)
+                return;
+            var row = dataGridView1.SelectedRows[0];
+            PopulateLineList((int)row.Cells["Type"].Value, row.Cells["Data"].Value);
         }
     }
 }
